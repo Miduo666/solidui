@@ -31,6 +31,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart' show KeyManager;
+import 'package:solidui/src/services/solid_security_key_notifier.dart';
 
 /// Helper class for Security Key operations.
 
@@ -73,6 +74,11 @@ class SecurityKeyOperations {
       // Use initPodKeys() to re-initialise the security key.
       await KeyManager.initPodKeys(key);
       debugPrint('Security key successfully initialised and saved.');
+
+      // Update global notifier to trigger status bar refresh
+      securityKeyNotifier.updateStatus(true);
+      debugPrint('Security key notifier updated (new key): true');
+
       return true;
     } catch (e) {
       debugPrint('Error setting security key: $e');
@@ -126,6 +132,11 @@ class SecurityKeyOperations {
       // This will throw if the key doesn't match.
       await KeyManager.setSecurityKey(key);
       debugPrint('Security key successfully restored and verified.');
+
+      // Update global notifier to trigger status bar refresh
+      securityKeyNotifier.updateStatus(true);
+      debugPrint('Security key notifier updated (restore key): true');
+
       return true;
     } catch (e) {
       debugPrint('Error restoring security key: $e');

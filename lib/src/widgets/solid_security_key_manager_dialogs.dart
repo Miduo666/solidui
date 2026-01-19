@@ -181,8 +181,14 @@ class SolidSecurityKeyManagerDialogs {
                       final success =
                           await handleRestoreFunction(keyController.text);
                       if (success) {
-                        if (context.mounted) Navigator.pop(context);
+                        // CRITICAL: Update status BEFORE closing dialog
+                        // This ensures the notification propagates while context is still valid
                         await onKeyRestored();
+
+                        // Give a brief moment for state updates to propagate
+                        await Future.delayed(const Duration(milliseconds: 100));
+
+                        if (context.mounted) Navigator.pop(context);
                       } else {
                         setState(() => isLoading = false);
                       }

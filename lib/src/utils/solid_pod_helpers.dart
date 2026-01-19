@@ -40,6 +40,7 @@ import 'package:solidpod/solidpod.dart'
         SecurityKeyUI,
         SecurityStrings;
 
+import 'package:solidui/src/services/solid_security_key_notifier.dart';
 import 'package:solidui/src/widgets/solid_login_webid_input_dialog.dart';
 
 /// Login if the user has not done so.
@@ -97,7 +98,12 @@ Future<void> getKeyFromUserIfRequired(
       submitFunc: (formDataMap) async {
         await KeyManager.setSecurityKey(formDataMap[inputKey].toString());
         debugPrint('Security key saved');
-        if (context.mounted) Navigator.pop(context);
+
+        // CRITICAL: Update notifier to trigger status bar refresh
+        securityKeyNotifier.updateStatus(true);
+        debugPrint('Security key notifier updated to: true');
+
+        // SecurityKeyUI will auto-close after successful submission
       },
       child: child,
     );

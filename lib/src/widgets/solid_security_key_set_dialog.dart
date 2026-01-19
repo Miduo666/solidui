@@ -134,15 +134,9 @@ class _SetKeyDialogState extends State<SetKeyDialog> {
       if (!mounted) return;
 
       if (success) {
-        // CRITICAL: Update status BEFORE closing dialogs
-        // This ensures the notification propagates while context is still valid
+        // Update the key status first.
 
         await widget.onKeyChanged();
-
-        if (!mounted) return;
-
-        // Give a brief moment for state updates to propagate
-        await Future.delayed(const Duration(milliseconds: 100));
 
         if (!mounted) return;
 

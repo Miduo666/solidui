@@ -241,22 +241,30 @@ class _SolidLoginState extends State<SolidLogin> with WidgetsBindingObserver {
   }
 
   // Auto-configure SolidAuthHandler if not already configured by the app.
+  // This is optional - if SolidAuthHandler is not available/configured,
+  // the login will still work with its built-in authentication logic.
 
   void _autoConfigureSolidAuthHandler() {
-    // Use configureDefaults instead of configure to preserve app settings
-    // This provides working defaults while keeping important app-specific
-    // configurations like onSecurityKeyReset callback.
+    try {
+      // Use configureDefaults instead of configure to preserve app settings
+      // This provides working defaults while keeping important app-specific
+      // configurations like onSecurityKeyReset callback.
 
-    SolidAuthHandler.instance.configureDefaults(
-      SolidAuthConfig(
-        appDirectory: widget.appDirectory,
-        defaultServerUrl: widget.webID,
-        appImage: widget.image,
-        appLogo: widget.logo,
-        appLink: widget.link,
-        loginSuccessWidget: widget.child,
-      ),
-    );
+      SolidAuthHandler.instance.configureDefaults(
+        SolidAuthConfig(
+          appDirectory: widget.appDirectory,
+          defaultServerUrl: widget.webID,
+          appImage: widget.image,
+          appLogo: widget.logo,
+          appLink: widget.link,
+          loginSuccessWidget: widget.child,
+        ),
+      );
+    } catch (e) {
+      // SolidAuthHandler is optional - if it's not available,
+      // the login widget will work with its built-in logic.
+      debugPrint('SolidAuthHandler auto-configuration skipped: $e');
+    }
   }
 
   @override

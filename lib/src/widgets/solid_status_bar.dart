@@ -136,13 +136,24 @@ class SolidStatusBar extends StatelessWidget {
 
     final theme = Theme.of(context);
 
+    // Use custom onTap if provided, otherwise try SolidAuthHandler
+    VoidCallback? tapHandler = loginStatus.onTap;
+    if (tapHandler == null) {
+      try {
+        tapHandler = () => SolidAuthHandler.instance.handleAuthAction(context);
+      } catch (e) {
+        // SolidAuthHandler not available - backwards compatibility fallback
+        // Widget will still render but won't be interactive
+        debugPrint('SolidAuthHandler not available for status bar: $e');
+      }
+    }
+
     return MarkdownTooltip(
       message: loginStatus.tooltipText,
       child: _createInteractiveText(
         context: context,
         text: 'Login Status: ${loginStatus.displayText}',
-        onTap: loginStatus.onTap ??
-            () => SolidAuthHandler.instance.handleAuthAction(context),
+        onTap: tapHandler,
         style: theme.textTheme.bodyMedium?.copyWith(
           color: loginStatus.isLoggedIn
               ? theme.colorScheme.tertiary

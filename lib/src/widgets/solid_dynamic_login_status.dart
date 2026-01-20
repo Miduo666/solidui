@@ -140,7 +140,7 @@ class _SolidDynamicLoginStatusState extends State<SolidDynamicLoginStatus> {
       if (widget.onTap != null) {
         widget.onTap!.call();
       } else {
-        SolidAuthHandler.instance.handleLogout(context);
+        _handleAuthAction(() => SolidAuthHandler.instance.handleLogout(context));
       }
     } else {
       // Login scenario - can delay status check
@@ -148,7 +148,7 @@ class _SolidDynamicLoginStatusState extends State<SolidDynamicLoginStatus> {
       if (widget.onLogin != null) {
         widget.onLogin!.call();
       } else {
-        SolidAuthHandler.instance.handleLogin(context);
+        _handleAuthAction(() => SolidAuthHandler.instance.handleLogin(context));
       }
 
       // Only refresh status for login scenario
@@ -158,6 +158,28 @@ class _SolidDynamicLoginStatusState extends State<SolidDynamicLoginStatus> {
           _checkLoginStatus();
         }
       });
+    }
+  }
+
+  /// Safely handles authentication actions with fallback.
+  /// If SolidAuthHandler is not available, shows a message to the user.
+
+  void _handleAuthAction(VoidCallback authAction) {
+    try {
+      authAction();
+    } catch (e) {
+      // SolidAuthHandler is not available - this is backwards compatibility fallback
+      debugPrint('SolidAuthHandler not available: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Authentication handler not configured. '
+              'Please provide custom onTap/onLogin callbacks.',
+            ),
+          ),
+        );
+      }
     }
   }
 

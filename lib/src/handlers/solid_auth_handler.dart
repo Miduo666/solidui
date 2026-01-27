@@ -100,6 +100,17 @@ class SolidAuthHandler {
   static SolidAuthHandler? _instance;
   SolidAuthConfig? _config;
 
+  // Cached login configuration from the app's original SolidLogin widget.
+
+  String? _cachedTitle;
+  String? _cachedAppDirectory;
+  String? _cachedWebId;
+  AssetImage? _cachedImage;
+  AssetImage? _cachedLogo;
+  String? _cachedLink;
+  Widget? _cachedChild;
+  bool _isAutoConfigured = false;
+
   SolidAuthHandler._internal();
 
   /// Singleton instance of the authentication handler.
@@ -115,35 +126,31 @@ class SolidAuthHandler {
     _config = config;
   }
 
-  /// Configure default values without overwriting existing configuration.
-  /// This is used by SolidLogin to provide fallback values while preserving
-  /// app-specific settings like onSecurityKeyReset.
+  /// Auto-configure from SolidLogin widget parameters.
+  /// Called automatically when SolidLogin initialises.
 
-  void configureDefaults(SolidAuthConfig defaults) {
-    if (_config == null) {
-      // No existing config, use defaults
-      _config = defaults;
-    } else {
-      // Merge: keep existing non-null values, fill in missing ones from defaults
-      _config = SolidAuthConfig(
-        returnTo: _config!.returnTo ?? defaults.returnTo,
-        loginPageBuilder:
-            _config!.loginPageBuilder ?? defaults.loginPageBuilder,
-        defaultServerUrl:
-            _config!.defaultServerUrl ?? defaults.defaultServerUrl,
-        appTitle: _config!.appTitle ?? defaults.appTitle,
-        appDirectory: _config!.appDirectory ?? defaults.appDirectory,
-        appImage: _config!.appImage ?? defaults.appImage,
-        appLogo: _config!.appLogo ?? defaults.appLogo,
-        appLink: _config!.appLink ?? defaults.appLink,
-        loginSuccessWidget:
-            _config!.loginSuccessWidget ?? defaults.loginSuccessWidget,
-        // IMPORTANT: Preserve app's security key reset callback
-        onSecurityKeyReset:
-            _config!.onSecurityKeyReset ?? defaults.onSecurityKeyReset,
-      );
-    }
+  void autoConfigureFromLogin({
+    required String title,
+    required String appDirectory,
+    required String webId,
+    required AssetImage image,
+    required AssetImage logo,
+    required String link,
+    required Widget child,
+  }) {
+    _cachedTitle = title;
+    _cachedAppDirectory = appDirectory;
+    _cachedWebId = webId;
+    _cachedImage = image;
+    _cachedLogo = logo;
+    _cachedLink = link;
+    _cachedChild = child;
+    _isAutoConfigured = true;
   }
+
+  /// Check if auto-configuration is available.
+
+  bool get hasAutoConfig => _isAutoConfigured;
 
   /// Handle logout functionality with confirmation popup.
 
@@ -161,17 +168,15 @@ class SolidAuthHandler {
     // No additional navigation needed.
   }
 
-  /// Handle login functionality - navigates to login page.
-  /// Works consistently across all platforms (web, mobile, desktop).
+  /// Handle login functionality by navigating to login page.
+  /// After successful login, navigates back to the app's root route.
 
   Future<void> handleLogin(BuildContext context) async {
     // Navigate to login page using standard Flutter navigation
     // This works across all platforms and maintains proper widget lifecycle
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => _buildLoginPage(context),
-      ),
+      MaterialPageRoute(builder: (context) => _buildLoginPage(context)),
     );
   }
 
@@ -185,10 +190,36 @@ class SolidAuthHandler {
       return _config!.loginPageBuilder!(context);
     }
 
-    // Use the login input page, not the success page
-    // The loginSuccessWidget (child) will be shown after successful authentication
-    final mainAppWidget = _config?.loginSuccessWidget ??
-        const Center(child: Text('Authentication required'));
+    // Use auto-configured values from the app's original SolidLogin if
+    // available.
+
+    if (_isAutoConfigured && _cachedChild != null) {
+      return SolidLogin(
+        key: const ValueKey('auto_configured_login'),
+        title: _cachedTitle ?? _config?.appTitle ?? 'Solid App',
+        appDirectory:
+            _cachedAppDirectory ?? _config?.appDirectory ?? 'solid_app',
+        webID: _cachedWebId ??
+            _config?.defaultServerUrl ??
+            SolidConfig.defaultServerUrl,
+        image: _cachedImage ??
+            _config?.appImage ??
+            const AssetImage(
+              'assets/images/default_image.jpg',
+              package: 'solidpod',
+            ),
+        logo: _cachedLogo ??
+            _config?.appLogo ??
+            const AssetImage(
+              'assets/images/default_logo.png',
+              package: 'solidpod',
+            ),
+        link: _cachedLink ?? _config?.appLink ?? 'https://solidproject.org',
+        child: _config?.loginSuccessWidget ?? _cachedChild!,
+      );
+    }
+
+    // Fall back to manual configuration or defaults.
 
     // Use ValueKey to identify this as a fresh login page instance
     // This works with didUpdateWidget() to reset state when needed
@@ -196,7 +227,6 @@ class SolidAuthHandler {
       key: const ValueKey('login_page'),
       appDirectory: _config?.appDirectory ?? 'solid_app',
       webID: _config?.defaultServerUrl ?? SolidConfig.defaultServerUrl,
-      // Use provided images or fallback to SolidLogin's defaults from solidpod package
       image: _config?.appImage ??
           const AssetImage(
             'assets/images/default_image.jpg',
@@ -207,7 +237,9 @@ class SolidAuthHandler {
             'assets/images/default_logo.png',
             package: 'solidpod',
           ),
-      child: mainAppWidget,
+      link: _config?.appLink ?? 'https://solidproject.org',
+      child: _config?.loginSuccessWidget ??
+          const Center(child: Text('Authentication required')),
     );
   }
 
@@ -225,11 +257,9 @@ class SolidAuthHandler {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Authentication error: $e'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Authentication error: $e')));
       }
     }
   }

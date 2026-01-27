@@ -298,8 +298,9 @@ class SolidStatusBar extends StatelessWidget {
     try {
       // Send a notification to trigger status refresh with actual key status.
 
-      SecurityKeyStatusChangedNotification(isKeySaved: isKeySaved)
-          .dispatch(context);
+      SecurityKeyStatusChangedNotification(
+        isKeySaved: isKeySaved,
+      ).dispatch(context);
     } catch (e) {
       debugPrint('Could not refresh parent security key status: $e');
     }
@@ -423,10 +424,7 @@ class SolidStatusBar extends StatelessWidget {
           child: Row(
             children: [
               // Always use Expanded to push right items to the right side.
-
-              Expanded(
-                child: serverInfo ?? const SizedBox.shrink(),
-              ),
+              Expanded(child: serverInfo ?? const SizedBox.shrink()),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: rightItems

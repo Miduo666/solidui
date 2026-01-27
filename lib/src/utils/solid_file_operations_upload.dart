@@ -54,7 +54,7 @@ class SolidFileUploadOperations {
     try {
       // Pick file to upload.
 
-      final result = await FilePicker.platform.pickFiles();
+      final result = await FilePicker.pickFiles();
       if (result == null || result.files.isEmpty) return;
 
       final file = result.files.first;
@@ -118,11 +118,7 @@ class SolidFileUploadOperations {
 
         // Upload file with encryption.
 
-        await writePod(
-          uploadPath,
-          fileContent,
-          encrypted: true,
-        );
+        await writePod(uploadPath, fileContent, encrypted: true);
 
         if (!context.mounted) return;
 

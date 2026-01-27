@@ -1,6 +1,6 @@
 /// Initial setup page constants.
 ///
-// Time-stamp: <Friday 2025-01-10 13:34:52 +1100 Graham Williams>
+// Time-stamp: <Thursday 2026-01-22 11:26:01 +1100 Graham Williams>
 ///
 /// Copyright (C) 2025, Software Innovation Institute, ANU.
 ///
@@ -50,43 +50,61 @@ const darkBlue = Color.fromARGB(255, 7, 87, 153);
 
 /// Text string variables used for the welcome message.
 
-const initialStructureWelcome = 'Welcome to the Solid Pod Setup Wizard!';
+const initialStructureWelcome = 'Welcome to the Solid Pod Setup Wizard';
 
 /// Text string variables as the title of the message box.
 
 const initialStructureTitle = 'Solid Pod';
 
-/// Text string variables used for informing the user about the creatiion of
-/// different resources.
+/// Text string variables used for informing the user about the first-time
+/// connection and security key requirement.
+///
+/// The [appName] parameter allows the message to display the actual app name
+/// instead of a generic "this App" reference.
 
-const initialStructureMsg = 'We notice that you have either created'
-    ' a new Solid Pod or your Pod has some missing files/folders'
-    ' (called resources).'
-    ' We will now setup the required resources to fully support'
-    ' the app functionalities.';
+String initialStructureMsg(String appName) =>
+    'You have connected to your Solid Pod using $appName for the first time. '
+    'A security key is required to encrypt and protect the data stored in your '
+    'Pod. You must remember this security key to access the data for $appName.';
 
 /// The string key of input form for the input of security key
 
 const securityKeyStr = '_security_key';
 
-/// The string key of the input form for retyping the security key
+/// The string key of the input form for retyping the security key.
+
 const securityKeyStrReType = '__security_key';
 
-/// Text string variables used for informing the user about the input of
-/// security key for encryption.
+/// Markdown tooltip text for the security key input field.
 
-const requiredSecurityKeyMsg =
-    'A security key (or key for short) is used to make your data private'
-    ' (using encryption) when it is stored in your Solid Pod.'
-    ' This could be the password you use to login to your'
-    ' Solid Pod (not recommended) or a different one (highly recommended).'
-    ' You will need to remember this key to access your data -'
-    ' a lost key means your data will also be lost.'
-    ' Please provide a security key and confirm it below. Thanks.';
+const securityKeyTooltip =
+    'A security key can be any string of characters that you can remember. '
+    'The longer the better, with a mix of characters.';
 
-/// Text string variables used for informing the user about the creation of
-/// public/private key pair for secure data sharing.
+const securityKeyRetypeTooltip =
+    'Please retype your security key to ensure it is correct. '
+    'We ask this to protect against loss of your data.';
 
-const publicKeyMsg =
-    'We will also create a random public/private key pair for secure data'
-    ' sharing, under your control, with other Solid Pods.';
+/// Tooltip text for the SUBMIT button.
+///
+/// The [appName] parameter allows the tooltip to display the actual app name.
+
+String submitButtonTooltip(String appName) =>
+    'Tap here once you have provided your security key. '
+    'This will record the key and create the Pod folder for $appName.';
+
+/// Tooltip text for the RESOURCES button.
+///
+/// The [appName] parameter allows the tooltip to display the actual app name.
+
+String resourcesButtonTooltip(String appName) =>
+    'Tap here to list all of the $appName resources '
+    'that will be created to initialise your Pod.';
+
+/// Tooltip text for the LOGOUT button.
+///
+/// The [appName] parameter allows the tooltip to display the actual app name.
+
+String logoutButtonTooltip(String appName) =>
+    'Tap here to logout from your connection to your Pod on the Solid server. '
+    'Next time you start $appName you will need to log into the server again.';

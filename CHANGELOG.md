@@ -13,8 +13,15 @@ The package is available from
 Coding documentation is available from [solid community
 au](https://solidcommunity.au/docs/solidui)
 
-## 0.1.0 First Release
+## 0.1.0 First Beta Release
 
++ Update dependency for file_picker 10.3.9 [0.0.32 20260127 dc]
++ UX review and remove duplicated login/logout [0.0.31 20260123 tonypioneer]
++ Improved setup wizard UX [0.0.30 20260123 tonypioneer]
++ Bug fix missing logout button [0.0.29 20260122 tonypioneer]
++ Improved SETUP WIZARD for better UX [0.0.28 20260122 tonypioneer]
++ Improve handling of app logo and image [0.0.27 20260122 tonypioneer]
++ Move PREFERENCES into the ABOUT dialog [0.0.26 20260122 tonypioneer]
 + Simplified light/dark theme management [0.0.25 20260116 tonypioneer]
 + Support custom folder structure [0.0.24 20260114 anusavid]
 + Default keyboard focus on LOGIN #160 [0.0.23 20260113 tonypioneer]

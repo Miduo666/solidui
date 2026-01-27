@@ -140,7 +140,9 @@ class _SolidDynamicLoginStatusState extends State<SolidDynamicLoginStatus> {
       if (widget.onTap != null) {
         widget.onTap!.call();
       } else {
-        _handleAuthAction(() => SolidAuthHandler.instance.handleLogout(context));
+        _handleAuthAction(
+          () => SolidAuthHandler.instance.handleLogout(context),
+        );
       }
     } else {
       // Login scenario - can delay status check

@@ -31,6 +31,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart' show KeyManager;
+
 import 'package:solidui/src/services/solid_security_key_notifier.dart';
 
 /// Helper class for Security Key operations.

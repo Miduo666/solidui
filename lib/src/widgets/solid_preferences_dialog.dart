@@ -98,40 +98,83 @@ class _SolidPreferencesDialogState extends State<SolidPreferencesDialog> {
   void _onOverflowChanged(int index, bool? value) {
     if (value == null) return;
     setState(() {
-      _appBarActions[index] =
-          _appBarActions[index].copyWith(showInOverflow: value);
+      _appBarActions[index] = _appBarActions[index].copyWith(
+        showInOverflow: value,
+      );
     });
   }
 
   void _onVisibilityChanged(int index, bool? value) {
     if (value == null) return;
-
-    // Prevent hiding AppBar Layout Preferences button
-
-    final action = _appBarActions[index];
-    if (action.id == SolidAppBarActionIds.preferences && value == false) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('AppBar Layout Preferences button cannot be hidden'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return;
-    }
-
     setState(() {
       _appBarActions[index] = _appBarActions[index].copyWith(isVisible: value);
     });
   }
 
   void _savePreferences() {
-    final newConfig = SolidPreferencesConfig(
-      appBarActions: _appBarActions,
-    );
+    final newConfig = SolidPreferencesConfig(appBarActions: _appBarActions);
 
     solidPreferencesNotifier.setConfig(newConfig);
     widget.onSave?.call();
     Navigator.of(context).pop();
+  }
+
+  void _resetToDefault() {
+    setState(() {
+      // Reset all actions to default values: visible, not in overflow,
+      // and sorted by their default order based on button type.
+
+      final resetActions = <SolidAppBarActionItem>[];
+      for (final action in _appBarActions) {
+        resetActions.add(
+          action.copyWith(
+            showInOverflow: false,
+            isVisible: true,
+            order: _getDefaultOrderForAction(action.id),
+          ),
+        );
+      }
+
+      // Sort by the default order.
+
+      resetActions.sort((a, b) => a.order.compareTo(b.order));
+
+      // Reassign sequential order values after sorting.
+
+      for (int i = 0; i < resetActions.length; i++) {
+        resetActions[i] = resetActions[i].copyWith(order: i);
+      }
+
+      _appBarActions = resetActions;
+    });
+  }
+
+  /// Returns the default order index for an action based on its ID.
+  /// This mirrors the initialIndex values in SolidAppBarActionsManager.
+
+  int _getDefaultOrderForAction(String actionId) {
+    // Theme toggle: 0.
+
+    if (actionId == SolidAppBarActionIds.themeToggle) return 0;
+
+    // Custom actions: 100+.
+
+    if (actionId.startsWith('action_')) {
+      final index = int.tryParse(actionId.replaceFirst('action_', '')) ?? 0;
+      return 100 + index;
+    }
+
+    // Logout: 300.
+
+    if (actionId == SolidAppBarActionIds.logout) return 300;
+
+    // About: 900.
+
+    if (actionId == SolidAppBarActionIds.about) return 900;
+
+    // Other items (overflow items): 200+.
+
+    return 200;
   }
 
   @override
@@ -154,7 +197,6 @@ class _SolidPreferencesDialogState extends State<SolidPreferencesDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Button Order Section.
-
               _buildSectionHeader(theme, 'Button Order'),
               const SizedBox(height: 8),
               SolidPreferencesButtonOrderSection(
@@ -167,14 +209,26 @@ class _SolidPreferencesDialogState extends State<SolidPreferencesDialog> {
           ),
         ),
       ),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _savePreferences,
-          child: const Text('Save'),
+        Row(
+          children: [
+            // Default button on the left.
+            TextButton(
+              onPressed: _resetToDefault,
+              child: const Text('Default'),
+            ),
+            const Spacer(),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            const SizedBox(width: 8),
+            FilledButton(
+              onPressed: _savePreferences,
+              child: const Text('Save'),
+            ),
+          ],
         ),
       ],
     );
@@ -183,9 +237,7 @@ class _SolidPreferencesDialogState extends State<SolidPreferencesDialog> {
   Widget _buildSectionHeader(ThemeData theme, String title) {
     return Text(
       title,
-      style: theme.textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
+      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 }

@@ -31,11 +31,9 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:gap/gap.dart';
-import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:solidui/src/widgets/solid_about_models.dart';
 import 'package:solidui/src/widgets/solid_nav_models.dart';
-import 'package:solidui/src/widgets/solid_preferences_dialog.dart';
 import 'package:solidui/src/widgets/solid_scaffold_appbar_actions.dart';
 import 'package:solidui/src/widgets/solid_scaffold_appbar_ordered_actions.dart';
 import 'package:solidui/src/widgets/solid_scaffold_appbar_overflow.dart';
@@ -59,13 +57,18 @@ class SolidScaffoldAppBarBuilder {
     double narrowScreenThreshold, {
     bool hideNavRail = false,
     void Function(BuildContext)? onLogout,
-    bool showPreferences = false,
+    void Function(BuildContext)? onLogin,
   }) {
+    // Always show auth button (login/logout) regardless of onLogout callback.
+
+    SolidAppBarActionsManager.initializeIfNeeded(
+      config,
+      themeToggle,
+      hasLogout: true,
+    );
+
     final isWideScreen = !hideNavRail &&
-        SolidScaffoldHelpers.isWideScreen(
-          context,
-          narrowScreenThreshold,
-        );
+        SolidScaffoldHelpers.isWideScreen(context, narrowScreenThreshold);
     final screenWidth = MediaQuery.of(context).size.width;
     final theme = Theme.of(context);
 
@@ -98,9 +101,8 @@ class SolidScaffoldAppBarBuilder {
       themeToggleCallback: themeToggleCallback,
       aboutConfig: aboutConfig,
       context: context,
-      showPreferences: showPreferences,
       onLogout: onLogout,
-      buildPreferencesButton: _buildPreferencesButton,
+      onLogin: onLogin,
     );
     actions.addAll(orderedActions);
 
@@ -115,9 +117,8 @@ class SolidScaffoldAppBarBuilder {
       themeToggleCallback,
       aboutConfig,
       context,
-      showPreferences: showPreferences,
       onLogout: onLogout,
-      onShowPreferences: _showPreferencesDialog,
+      onLogin: onLogin,
     );
 
     return AppBar(
@@ -126,39 +127,5 @@ class SolidScaffoldAppBarBuilder {
       automaticallyImplyLeading: !isWideScreen,
       actions: actions.isEmpty ? null : actions,
     );
-  }
-
-  /// Builds the layout preferences button for AppBar.
-
-  static Widget _buildPreferencesButton(
-    BuildContext context,
-    SolidAppBarConfig config,
-    SolidThemeToggleConfig? themeToggle,
-  ) {
-    return MarkdownTooltip(
-      message: '''
-
-  **AppBar Layout Preferences:** Configure button layout settings.
-  Customise the AppBar button order and visibility.
-
-  ''',
-      child: IconButton(
-        icon: const Icon(Icons.tune),
-        onPressed: () => _showPreferencesDialog(context, config, themeToggle),
-      ),
-    );
-  }
-
-  /// Shows the AppBar layout preferences dialogue.
-
-  static void _showPreferencesDialog(
-    BuildContext context,
-    SolidAppBarConfig config,
-    SolidThemeToggleConfig? themeToggle,
-  ) {
-    // Initialise AppBar actions in preferences if not already done.
-
-    SolidAppBarActionsManager.initializeIfNeeded(config, themeToggle);
-    SolidPreferencesDialog.show(context);
   }
 }

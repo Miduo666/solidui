@@ -52,13 +52,13 @@ class SolidOverflowMenuHelpers {
     SolidAboutConfig aboutConfig,
     bool hasThemeToggleInOverflow,
     bool hasAboutInOverflow, {
-    bool hasPreferencesInOverflow = false,
     bool hasLogoutInOverflow = false,
+    bool isLoggedIn = true,
   }) {
     List<PopupMenuItem<String>> items = [];
-    final allActions =
-        List<SolidAppBarActionItem>.from(solidPreferencesNotifier.appBarActions)
-          ..sort((a, b) => a.order.compareTo(b.order));
+    final allActions = List<SolidAppBarActionItem>.from(
+      solidPreferencesNotifier.appBarActions,
+    )..sort((a, b) => a.order.compareTo(b.order));
 
     for (final actionItem in allActions) {
       if (!actionItem.isVisible || !actionItem.showInOverflow) continue;
@@ -71,9 +71,7 @@ class SolidOverflowMenuHelpers {
           currentThemeMode,
         );
       } else if (actionItem.id == SolidAppBarActionIds.logout) {
-        _addLogout(items, hasLogoutInOverflow);
-      } else if (actionItem.id == SolidAppBarActionIds.preferences) {
-        _addPreferences(items, hasPreferencesInOverflow);
+        _addAuthMenuItem(items, hasLogoutInOverflow, isLoggedIn);
       } else if (actionItem.id == SolidAppBarActionIds.about) {
         _addAbout(items, hasAboutInOverflow, aboutConfig);
       } else if (actionItem.id.startsWith('action_')) {
@@ -121,33 +119,24 @@ class SolidOverflowMenuHelpers {
     );
   }
 
-  static void _addLogout(List<PopupMenuItem<String>> items, bool show) {
-    if (!show) return;
-    items.add(
-      const PopupMenuItem<String>(
-        value: 'logout',
-        child: Row(
-          children: [
-            Icon(Icons.logout),
-            SizedBox(width: 8),
-            Text('Logout'),
-          ],
-        ),
-      ),
-    );
-  }
+  /// Adds authentication menu item (login or logout) based on current state.
 
-  static void _addPreferences(List<PopupMenuItem<String>> items, bool show) {
+  static void _addAuthMenuItem(
+    List<PopupMenuItem<String>> items,
+    bool show,
+    bool isLoggedIn,
+  ) {
     if (!show) return;
+
+    final icon = isLoggedIn ? Icons.logout : Icons.login;
+    final label = isLoggedIn ? 'Logout' : 'Login';
+    final value = isLoggedIn ? 'logout' : 'login';
+
     items.add(
-      const PopupMenuItem<String>(
-        value: 'preferences',
+      PopupMenuItem<String>(
+        value: value,
         child: Row(
-          children: [
-            Icon(Icons.tune),
-            SizedBox(width: 8),
-            Text('AppBar Layout Preferences'),
-          ],
+          children: [Icon(icon), const SizedBox(width: 8), Text(label)],
         ),
       ),
     );

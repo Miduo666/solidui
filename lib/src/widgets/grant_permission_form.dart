@@ -32,7 +32,15 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:solidpod/solidpod.dart';
+import 'package:solidpod/solidpod.dart'
+    show
+        AccessMode,
+        getAccessMode,
+        grantPermission,
+        publicAgent,
+        authenticatedAgent,
+        RecipientType,
+        SolidFunctionCallStatus;
 
 import 'package:solidui/solidui.dart'
     show
